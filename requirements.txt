@@ -1,0 +1,14 @@
+numpy
+scipy
+matplotlib
+numba
+bqplot
+voila
+pydgrid
+bokeh
+nbsphinx
+IPython
+ipykernel
+requests
+pandas
+ipympl
