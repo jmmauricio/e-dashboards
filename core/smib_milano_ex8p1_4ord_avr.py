@@ -1,5 +1,7 @@
 import numpy as np
 import numba
+import scipy.optimize as sopt
+
 
 sin = np.sin
 cos = np.cos
@@ -220,6 +222,56 @@ class smib_milano_ex8p1_4ord_avr_class:
         
         
         return A
+
+    def simulate(self,events):
+        # simulation parameters
+        self.struct[0].it = 0       # set time step to zero
+        self.struct[0].it_store = 0 # set storage to zero
+        self.struct[0].t = 0.0      # set time to zero
+                    
+        # initialization
+        it_event = 0
+        event = events[it_event]
+        for item in event:
+            self.struct[0][item] = event[item]
+            
+        
+        ## compute initial conditions using x and y_ini 
+        xy0 = np.ones(self.N_x+self.N_y)
+        xy = sopt.fsolve(self.ini_problem,xy0 )
+        self.struct[0].x[:,0] = xy[0:self.N_x]
+        self.struct[0].y[:,0] = xy[self.N_x:]
+
+        ## y_ini to u_run
+        for item in self.inputs_run_list:
+            if item in self.y_ini_list:
+                self.struct[0][item] = self.struct[0].y_ini[self.y_ini_list.index(item)]
+
+        ## u_ini to y_run
+        for item in self.inputs_ini_list:
+            if item in self.y_list:
+                self.struct[0].y[self.y_list.index(item)] = self.struct[0][item]
+    
+        ## solve selfem
+        daesolver(self.struct)    # run until first event
+
+        # simulation run
+        for event in events[1:]:  
+            for item in event:
+                self.struct[0][item] = event[item]
+            daesolver(self.struct)    # run until next event
+            
+        
+        # post process result    
+        T = self.struct[0]['T'][:self.struct[0].it_store]
+        X = self.struct[0]['X'][:self.struct[0].it_store,:]
+        Y = self.struct[0]['Y'][:self.struct[0].it_store,:]
+
+        self.T = T
+        self.X = X
+        self.Y = Y
+
+        return T,X,Y
 
 
 @numba.njit(cache=True)
