@@ -12,3 +12,4 @@ ipykernel
 requests
 pandas
 ipympl
+pydae
