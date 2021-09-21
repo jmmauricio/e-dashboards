@@ -1,0 +1,24 @@
+name: dash-environment
+channels:
+  - conda-forge
+dependencies:
+  - python
+  - numpy
+  - scipy
+  - matplotlib
+  - numba
+  - voila
+  - pydgrid
+  - bokeh
+  - nbsphinx
+  - IPython
+  - ipykernel
+  - requests
+  - pandas
+  - ipympl
+  - pip
+  - pip:
+    - nbgitpuller
+    - sphinx-gallery
+    - pandas
+    - pydae
