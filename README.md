@@ -13,10 +13,11 @@
 
 # Synchronous machine dashboard
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jmmauricio/e-dashboards.git/HEAD?labpath=voila%2Frender%2Fsmib.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jmmauricio/e-dashboards.git/HEAD?urlpath=voila%2Frender%2Fsmib.ipynb)
+
 
 
 
 # Synchronous machine with AVR dashboard
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jmmauricio/e-dashboards.git/HEAD?labpath=voila%2Frender%2Fsmib_avr.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jmmauricio/e-dashboards.git/HEAD?urlpath=voila%2Frender%2Fsmib_avr.ipynb)
