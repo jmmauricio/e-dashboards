@@ -13,7 +13,8 @@
 
 # Synchronous machine dashboard
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jmmauricio/e-dashboards/master?urlpath=voila%2Frender%2Fsmib_milano_ex8p1_4ord_dashb.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jmmauricio/e-dashboards.git/HEAD?labpath=voila%2Frender%2Fsmib.ipynb)
+
 
 
 # Synchronous machine with AVR dashboard
