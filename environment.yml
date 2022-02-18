@@ -3,8 +3,9 @@ channels:
   - conda-forge
 dependencies:
   - python
-  - numpy
+  - numpy=1.21
   - scipy
+  - sympy
   - matplotlib
   - numba
   - voila
