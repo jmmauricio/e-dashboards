@@ -141,7 +141,7 @@ class dashboard(smib.smib_class):
 
         #grid = smib.smib_class()
         #grid.Dt = 0.01
-        #grid.decimation = 1
+        grid.decimation = 10
         grid.Dt = 0.01
         grid.ini({'p_c_1':0.0,'v_f_1':1.0,
                   'P_2':-50000e6,'D_1':0,
