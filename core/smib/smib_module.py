@@ -1,65 +1,60 @@
-import numpy as np
-import sympy as sym
-import pydae.build_cffi as db
-from pydae.grid_bpu import bpu
+from pydae.bmapu import bmapu_builder
 
-grid = bpu('smib.json')
-
-g_list = grid.dae['g'] 
-h_dict = grid.dae['h_dict']
-f_list = grid.dae['f']
-x_list = grid.dae['x']
-params_dict = grid.dae['params_dict']
-
-
-sys = {'name':'smib',
-       'params_dict':params_dict,
-       'f_list':f_list,
-       'g_list':g_list,
-       'x_list':x_list,
-       'y_ini_list':grid.dae['y_ini'],
-       'y_run_list':grid.dae['y_run'],
-       'u_run_dict':grid.dae['u_run_dict'],
-       'u_ini_dict':grid.dae['u_ini_dict'],
-       'h_dict':h_dict}
-
-dblr = db.builder(sys)
-dblr.build()
+data = {
+"system":{"name":"smib","S_base":100e6, "K_p_agc":0.0,"K_i_agc":0.0,"K_xif":0.01},       
+"buses":[{"name":"1", "P_W":0.0,"Q_var":0.0,"U_kV":20.0},
+         {"name":"2", "P_W":0.0,"Q_var":0.0,"U_kV":20.0}
+        ],
+"lines":[{"bus_j":"1", "bus_k":"2", "X_pu":0.05,"R_pu":0.01,"Bs_pu":1e-6,"S_mva":100.0}],
+"syns":[
+      {"bus":"1","S_n":10e6,
+         "X_d":1.8,"X1d":0.3, "T1d0":8.0,    
+         "X_q":1.7,"X1q":0.55,"T1q0":0.4,  
+         "R_a":0.01,"X_l": 0.2, 
+         "H":5.0,"D":1.0,
+         "Omega_b":314.1592653589793,"omega_s":1.0,"K_sec":0.0,
+         "K_delta":0.0}],
+"genapes":[{"bus":"2","S_n":1e9,"F_n":50.0,"X_v":0.001,"R_v":0.0,"K_delta":0.001,"K_alpha":1e-6}]
+}
+grid = bmapu_builder.bmapu(data)
+grid.checker()
+grid.uz_jacs = True
+grid.construct('smib')
+grid.compile()
 
 import numpy as np
 import matplotlib.pyplot as plt
 import ipywidgets
-#plt.style.use('presentation.mplstyle')
+#plt.style.use('https://raw.githubusercontent.com/jmmauricio/dash_im/master/presentation.mplstyle')
 colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
 import smib
-grid = smib.smib_class()
+model = smib.model()
 
 
-class dashboard(smib.smib_class):
+class dashboard(smib.model):
     
     def __init__(self):
         
         super().__init__()
         
-        grid = smib.smib_class()
-        grid.Dt = 0.01
-        grid.decimation = 1
-        grid.ini({'p_c_1':0.0,'v_f_1':1.0,
-                  'P_2':-50000e6,'D_1':0,
-                 "T_gov_1_1":1.0,"T_gov_2_1":1.0,"T_gov_3_1":1.0, "K_imw_1":1,"Droop_1":1e3},'xy_0.json')
-        grid.run(30.0,{})
-        grid.post();
+        model = smib.model()
+        model.Dt = 0.01
+        model.decimation = 1
+        model.ini({'v_f_1':1.0,'p_m_1':0.0},'xy_0.json')
+
+        model.run(30.0,{})
+        model.post();
         
-        self.grid = grid
+        self.model = model
         
-        plt.style.use('presentation.mplstyle')
+        #plt.style.use('presentation.mplstyle')
         self.colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
         self.widgets()
         
     def widgets(self):
         
-        grid = self.grid
+        model = self.model
         colors = self.colors
 
         plt.ioff()
@@ -69,12 +64,12 @@ class dashboard(smib.smib_class):
         fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(9, 4), frameon=False)
         fig.canvas.toolbar_visible = False
 
-        self.line_delta = axes[0,0].plot(grid.Time, grid.get_values('delta_1'), label='$\sf \delta$', color=colors[4])
-        self.line_omega = axes[1,0].plot(grid.Time, grid.get_values('omega_1'), label='$\sf \omega$', color=colors[1])
-        self.line_v_1 = axes[0,1].plot(grid.Time, grid.get_values('V_1'), label='$\sf V_1$', color=colors[5])
+        self.line_delta = axes[0,0].plot(model.Time, model.get_values('delta_1'), label='$\sf \delta$', color=colors[4])
+        self.line_omega = axes[1,0].plot(model.Time, model.get_values('omega_1'), label='$\sf \omega$', color=colors[1])
+        self.line_v_1 = axes[0,1].plot(model.Time, model.get_values('V_1'), label='$\sf V_1$', color=colors[5])
         #line_theta_1 = axes[0,1].plot(T, Y[:,syst.y_list.index('theta_1')], label='$\sf \\theta_1$')
-        self.line_p_t = axes[1,1].plot(grid.Time, grid.get_values('p_g_1'), label='$\sf P_t$', color=colors[2])
-        self.line_q_t = axes[1,1].plot(grid.Time, grid.get_values('q_g_1'), label='$\sf Q_t$', color=colors[0])
+        self.line_p_t = axes[1,1].plot(model.Time, model.get_values('p_g_1'), label='$\sf P_t$', color=colors[2])
+        self.line_q_t = axes[1,1].plot(model.Time, model.get_values('q_g_1'), label='$\sf Q_t$', color=colors[0])
 
         y_labels = ['$\delta$','$\omega$','$P_t$']
 
@@ -102,13 +97,13 @@ class dashboard(smib.smib_class):
         #axes[1].set_title('Corriente en función de la velocidad')
 
 
-        self.sld_p_m = ipywidgets.FloatSlider(orientation='horizontal',description = "$\sf p_m$", 
-                                        value=grid.get_value('p_m_1'), min=0.0,max= 1.2, 
+        self.sld_p_m = ipywidgets.FloatSlider(orientation='horizontal',description = "<p>p<sub>m</sub></p>", 
+                                        value=model.get_value('p_m_1'), min=0.0,max= 1.2, 
                                         step=.1)
 
 
-        self.sld_v_f = ipywidgets.FloatSlider(orientation='horizontal',description = "$\sf v_f$", 
-                                        value=grid.get_value('v_f_1'), min=0.5,max= 4, 
+        self.sld_v_f = ipywidgets.FloatSlider(orientation='horizontal',description = "<p>v<sub>f</sub></p>", 
+                                        value=model.get_value('v_f_1'), min=0.5,max= 4, 
                                         step=.1)
 
         self.prog_c = ipywidgets.IntProgress(
@@ -133,35 +128,29 @@ class dashboard(smib.smib_class):
         
     def update(self,change):
         
-        grid = self.grid
+        model = self.model
 
         p_m = self.sld_p_m.value
         v_f = self.sld_v_f.value
 
+        model.decimation = 10
+        model.Dt = 0.01
+        model.ini({'v_f_1':1.0,'p_m_1':0.0},'xy_0.json')
+        model.run( 1.0,{})
+        model.run(10,{'p_m_1':p_m,'v_f_1':v_f})
+        model.Dt = 0.1
+        model.run(30,{'p_m_1':p_m,'v_f_1':v_f})
 
-        #grid = smib.smib_class()
-        #grid.Dt = 0.01
-        grid.decimation = 10
-        grid.Dt = 0.01
-        grid.ini({'p_c_1':0.0,'v_f_1':1.0,
-                  'P_2':-50000e6,'D_1':0,
-                 "T_gov_1_1":0.1,"T_gov_2_1":1.0,"T_gov_3_1":1.0, "K_imw_1":1,"Droop_1":1e3},'xy_0.json')
-        grid.run( 1.0,{})
-        grid.run(10,{'p_c_1':p_m,'v_f_1':v_f})
-        grid.Dt = 0.1
-        grid.run(30,{'p_c_1':p_m,'v_f_1':v_f})
+        model.post();
 
-        grid.post();
-
-
-        self.line_delta[0].set_data(grid.Time, grid.get_values('delta_1'))
-        self.line_omega[0].set_data(grid.Time, grid.get_values('omega_1'))
-        self.line_v_1[0].set_data(grid.Time, grid.get_values('V_1'))
+        self.line_delta[0].set_data(model.Time, model.get_values('delta_1'))
+        self.line_omega[0].set_data(model.Time, model.get_values('omega_1'))
+        self.line_v_1[0].set_data(model.Time, model.get_values('V_1'))
         #line_theta_1 = axes[0,1].plot(T, Y[:,syst.y_list.index('theta_1')], label='$\sf \\theta_1$')
-        self.line_p_t[0].set_data(grid.Time, grid.get_values('p_g_1'))
-        self.line_q_t[0].set_data(grid.Time, grid.get_values('q_g_1'))
+        self.line_p_t[0].set_data(model.Time, model.get_values('p_g_1'))
+        self.line_q_t[0].set_data(model.Time, model.get_values('q_g_1'))
 
-        i_d, i_q = grid.get_mvalue(['i_d_1','i_q_1'])
+        i_d, i_q = model.get_mvalue(['i_d_1','i_q_1'])
         c = (i_d**2+i_q**2)*0.5
 
         self.prog_c.bar_style = 'success'
@@ -172,7 +161,6 @@ class dashboard(smib.smib_class):
         self.prog_c.value = 100*c
 
         self.fig.canvas.draw_idle()
-
 
     def show(self):
 
@@ -185,4 +173,3 @@ class dashboard(smib.smib_class):
         layout = ipywidgets.VBox([layout_row1,layout_row2])
         self.layout = layout
         display(self.layout)
-     
