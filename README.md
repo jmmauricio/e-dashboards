@@ -26,3 +26,7 @@
 # Phase-shifting transformer
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jmmauricio/e-dashboards.git/HEAD?labpath=trafo_shift_dashb.ipynb)
+
+# Wave propagation in a line
+
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jmmauricio/e-dashboards.git/HEAD?labpath=db_emt_line.ipynb.ipynb)

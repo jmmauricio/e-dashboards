@@ -19,7 +19,7 @@ data = {
 grid = bmapu_builder.bmapu(data)
 grid.checker()
 grid.uz_jacs = True
-grid.construct('smib')
+grid.construct('smib_model')
 grid.compile()
 
 import numpy as np
@@ -28,17 +28,17 @@ import ipywidgets
 #plt.style.use('https://raw.githubusercontent.com/jmmauricio/dash_im/master/presentation.mplstyle')
 colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
-import smib
-model = smib.model()
+import smib_model
+model = smib_model.model()
 
 
-class dashboard(smib.model):
+class dashboard(smib_model.model):
     
     def __init__(self):
         
         super().__init__()
         
-        model = smib.model()
+        model = smib_model.model()
         model.Dt = 0.01
         model.decimation = 1
         model.ini({'v_f_1':1.0,'p_m_1':0.0},'xy_0.json')
